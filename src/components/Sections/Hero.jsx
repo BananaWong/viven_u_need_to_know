@@ -208,7 +208,7 @@ const Hero = () => {
                <div
                  className="w-full h-full"
                  style={{
-                   backgroundImage: `url('https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg')`,
+                   backgroundImage: `url('https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1773485850/Herosection_d2abca.jpg')`,
                    backgroundSize: 'cover',
                    backgroundPosition: 'center',
                  }}
@@ -221,14 +221,14 @@ const Hero = () => {
                  loop
                  playsInline
                  preload="auto"
-                 poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
+                 poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1773485850/Herosection_d2abca.jpg"
                  className="w-full h-full object-cover"
                  style={{
                    WebkitTransform: 'translate3d(0,0,0)',
                    transform: 'translate3d(0,0,0)',
                  }}
                >
-                 <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
+                 <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1773485850/Herosection_d2abca.mp4" type="video/mp4" />
                </video>
              )}
            </div>
