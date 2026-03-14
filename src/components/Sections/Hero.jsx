@@ -228,7 +228,10 @@ const Hero = () => {
                    transform: 'translate3d(0,0,0)',
                  }}
                >
-                 <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1773485850/Herosection_d2abca.mp4" type="video/mp4" />
+                 {/* AV1: smaller file, Chrome/Firefox pick this */}
+                 <source src="/videos/Herosection_av1.mp4" type="video/mp4; codecs=av01.0.05M.08" />
+                 {/* H.264: Safari fallback, maximum compatibility */}
+                 <source src="/videos/Herosection_h264.mp4" type="video/mp4; codecs=avc1.42E01E" />
                </video>
              )}
            </div>
