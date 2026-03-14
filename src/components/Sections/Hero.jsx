@@ -185,21 +185,23 @@ const Hero = () => {
 
       <div className="absolute inset-0 z-0">
          <div className="absolute inset-0">
-           {/* Desktop Video */}
-           <video
-             ref={videoRef}
-             autoPlay
-             muted
-             loop
-             playsInline
-             preload="auto"
-             poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
-             className="hidden md:block w-full h-full object-cover"
-             style={{ filter: 'brightness(95%) contrast(105%)' }}
-           >
-              {/* f_mp4 ensures Safari always receives MP4 (H.264), avoiding f_auto format negotiation issues */}
-              <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
-           </video>
+           {/* Desktop Video — filter applied to wrapper div, NOT the video element.
+               Safari has a known bug where CSS filter directly on <video> causes a black screen
+               due to broken compositing layer handling. Chrome is unaffected. */}
+           <div className="hidden md:block w-full h-full" style={{ filter: 'brightness(95%) contrast(105%)' }}>
+             <video
+               ref={videoRef}
+               autoPlay
+               muted
+               loop
+               playsInline
+               preload="auto"
+               poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
+               className="w-full h-full object-cover"
+             >
+               <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
+             </video>
+           </div>
            
            {/* Mobile Image */}
            <div 
