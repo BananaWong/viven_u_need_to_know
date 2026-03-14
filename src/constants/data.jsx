@@ -113,10 +113,10 @@ export const CALENDAR_EVENTS = [
 ];
 
 export const PRODUCT_FINISHES = [
-    { id: 'matte-black',    label: 'Matte Black',    color: '#1A1A1C', textMode: 'dark',  desc: `A bold, light-absorbing finish. Fingerprint resistant and unapologetically modern.`,        img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/black_vuby1n.webp` },
-    { id: 'brushed-nickel', label: 'Brushed Nickel', color: '#F0F0F2', textMode: 'light', desc: `Timeless and versatile. Designed to match your stainless steel appliances perfectly.`,    img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/Brushed_Nickel_lbkocf.webp` },
-    { id: 'brushed-bronze', label: 'Brushed Bronze', color: '#8A6B4E', textMode: 'dark',  desc: `Warm and inviting. Adds a subtle, sophisticated touch of vintage luxury to your kitchen.`, img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/Brushed_Bronze_xjzc8z.webp` },
-    { id: 'brushed-brass',  label: 'Brushed Brass',  color: '#C4A052', textMode: 'dark',  desc: `Radiant and classic. A jewel-like finish that brings a golden warmth to the space.`,      img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698701/Brushed_Brass_wiskfq.webp` },
+    { id: 'matte-black',    label: 'Matte Black',    color: '#1A1A1C', textMode: 'dark',  desc: `A bold, light-absorbing finish. Fingerprint resistant and unapologetically modern.`,        img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/black_vuby1n.webp`, sceneImg: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1773542947/black_lfwecd.webp` },
+    { id: 'brushed-nickel', label: 'Brushed Nickel', color: '#F0F0F2', textMode: 'light', desc: `Timeless and versatile. Designed to match your stainless steel appliances perfectly.`,    img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/Brushed_Nickel_lbkocf.webp`, sceneImg: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1773543108/BRUSH_vcqcx2.webp` },
+    { id: 'brushed-bronze', label: 'Brushed Bronze', color: '#8A6B4E', textMode: 'dark',  desc: `Warm and inviting. Adds a subtle, sophisticated touch of vintage luxury to your kitchen.`, img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698702/Brushed_Bronze_xjzc8z.webp`, sceneImg: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1773543133/brazon_e636ff.webp` },
+    { id: 'brushed-brass',  label: 'Brushed Brass',  color: '#C4A052', textMode: 'dark',  desc: `Radiant and classic. A jewel-like finish that brings a golden warmth to the space.`,      img: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1772698701/Brushed_Brass_wiskfq.webp`, sceneImg: `https://res.cloudinary.com/dsyxtnpgm/image/upload/v1773543183/GOLD_1_ukqwmc.webp` },
 ];
 
 export const INITIAL_DISCUSSION_POSTS = [

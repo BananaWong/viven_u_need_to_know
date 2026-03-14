@@ -8,7 +8,6 @@ const ProductFinishesSection = () => {
   // PC State
   const [viewMode, setViewMode] = useState('lineup'); // 'lineup' | 'detail'
   const [activeId, setActiveId] = useState(null);
-  const [isSwitching, setIsSwitching] = useState(false);
   
   // Mobile State
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
@@ -78,14 +77,8 @@ const ProductFinishesSection = () => {
 
   // --- PC 核心切换逻辑 ---
   const handleDetailSwitch = (id) => {
-      if (id === activeId || isSwitching) return;
-      setIsSwitching(true);
-      setViewMode('lineup');
-      setTimeout(() => {
-          setActiveId(id);
-          setViewMode('detail');
-          setIsSwitching(false);
-      }, 750); 
+      if (id === activeId) return;
+      setActiveId(id);
   };
 
   useGSAP(() => {
@@ -95,12 +88,12 @@ const ProductFinishesSection = () => {
       // --- PC ANIMATIONS ---
       mm.add("(min-width: 768px)", () => {
           if (viewMode === 'lineup') {
-              window.gsap.to(titleRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power3.out', overwrite: 'auto' });
+              window.gsap.to(titleRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out', overwrite: 'auto' });
 
               window.gsap.to(panelRef.current, {
-                  x: 80,
+                  x: 40,
                   opacity: 0,
-                  duration: 0.4,
+                  duration: 0.6,
                   ease: 'power3.in',
                   overwrite: 'auto',
                   onComplete: () => window.gsap.set(panelRef.current, { pointerEvents: 'none' })
@@ -113,8 +106,8 @@ const ProductFinishesSection = () => {
                       opacity: 1,
                       zIndex: 1,
                       filter: 'brightness(1)',
-                      duration: 1.1,
-                      ease: 'expo.inOut',
+                      duration: 1.6,
+                      ease: 'power3.inOut',
                       overwrite: 'auto'
                   });
 
@@ -127,50 +120,51 @@ const ProductFinishesSection = () => {
                       scale: 0.55,
                       opacity: 1,
                       filter: 'blur(0px)',
-                      duration: 1.2,
-                      ease: 'expo.inOut',
+                      duration: 1.6,
+                      ease: 'power3.inOut',
                       overwrite: 'auto'
                   });
               });
           } else if (viewMode === 'detail' && activeId) {
               const activeIdx = finishes.findIndex(f => f.id === activeId);
 
-              window.gsap.to(titleRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
+              window.gsap.to(titleRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
 
-              finishes.forEach((_, i) => {
+              finishes.forEach((f, i) => {
                   const isActive = i === activeIdx;
                   
                   window.gsap.to(panesRef.current[i], {
-                      left: isActive ? '0%' : (i < activeIdx ? '-25%' : '100%'),
-                      width: isActive ? '100%' : '25%',
+                      left: isActive ? '0%' : (i < activeIdx ? '-100%' : '100%'),
+                      width: '100%', // All panes become full-width for sliding transition
                       opacity: 1,
                       zIndex: isActive ? 10 : 1,
                       filter: 'brightness(1)',
-                      duration: 1.3,
+                      duration: 2.2,
                       ease: 'power4.inOut',
                       overwrite: 'auto'
                   });
 
                   if (isActive) {
                       window.gsap.to(imgsRef.current[i], {
+                          // Match the pane's movement or fade out completely since sceneImg is present
                           left: '30%',
                           top: '52%',
                           xPercent: -50,
                           yPercent: -50,
-                          scale: 0.85,
-                          opacity: 1,
-                          filter: 'blur(0px)',
-                          duration: 1.4,
+                          scale: 0.55, // Keep original scale during transition
+                          opacity: 0, // Fade out because sceneImg is taking over
+                          filter: 'blur(10px)',
+                          duration: 1.2,
                           ease: 'power4.out',
                           overwrite: 'auto'
                       });
                   } else {
                       window.gsap.to(imgsRef.current[i], {
-                          left: i < activeIdx ? '-20%' : '120%',
+                          left: i < activeIdx ? '-50%' : '150%',
                           opacity: 0,
                           scale: 0.4,
                           filter: 'blur(15px)',
-                          duration: 0.7,
+                          duration: 1.2,
                           ease: 'power3.inOut',
                           overwrite: 'auto'
                       });
@@ -181,8 +175,8 @@ const ProductFinishesSection = () => {
                   x: 0,
                   y: 0,
                   opacity: 1,
-                  duration: 0.8,
-                  delay: 0.3,
+                  duration: 1.2,
+                  delay: 0.8,
                   ease: 'power3.out',
                   overwrite: 'auto',
                   onStart: () => window.gsap.set(panelRef.current, { pointerEvents: 'auto' })
@@ -248,15 +242,22 @@ const ProductFinishesSection = () => {
                 <div
                    key={`pane-${f.id}`}
                    ref={el => panesRef.current[i] = el}
-                   className={`absolute top-0 bottom-0 ${viewMode === 'lineup' ? 'cursor-pointer' : ''} flex flex-col justify-start items-center pt-28`}
+                   className={`absolute top-0 bottom-0 ${viewMode === 'lineup' ? 'cursor-pointer' : ''} flex flex-col justify-start items-center pt-28 overflow-hidden`}
                    style={{ backgroundColor: f.color, left: `${i * 25}%`, width: '25%' }}
                    onClick={() => handlePaneClick(f.id)}
                    onMouseEnter={() => handlePaneHover(i, true)}
                    onMouseLeave={() => handlePaneHover(i, false)}
                 >
+                   {/* Lifestyle Scene Image (Visible in Detail Mode) */}
+                   {f.sceneImg && (
+                      <div className={`absolute inset-0 transition-opacity duration-1500 ease-in-out ${viewMode === 'detail' && activeId === f.id ? 'opacity-100' : 'opacity-0'}`}>
+                         <img src={f.sceneImg} alt={`${f.label} lifestyle`} className="w-full h-full object-cover" />
+                         {/* Overlay for text readability */}
+                         <div className={`absolute inset-0 ${f.textMode === 'dark' ? 'bg-black/20' : 'bg-white/10'}`}></div>
+                      </div>
+                   )}
                    {/* Finish Label */}
-                   <div className={`transition-all duration-700 ease-expo pointer-events-none px-4 text-center ${viewMode === 'lineup' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'}`}>
-                      <span className={`text-[13px] font-bold uppercase tracking-[0.2em] whitespace-nowrap ${f.textMode === 'dark' ? 'text-white/70' : 'text-black/60'}`}>
+                   <div className={`transition-all duration-700 ease-expo pointer-events-none px-4 text-center z-10 ${viewMode === 'lineup' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8'}`}>                      <span className={`text-[13px] font-bold uppercase tracking-[0.2em] whitespace-nowrap ${f.textMode === 'dark' ? 'text-white/70' : 'text-black/60'}`}>
                          {f.label}
                       </span>
                    </div>

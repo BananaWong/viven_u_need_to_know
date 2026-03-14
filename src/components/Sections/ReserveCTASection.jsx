@@ -190,8 +190,7 @@ const ReserveCTASection = () => {
                                <span className="text-[9px] md:text-[10px] font-mono font-bold uppercase tracking-widest text-[#f2663b] leading-tight text-center">FREE</span>
                            </div>
                            <span className="text-[1.2rem] md:text-5xl font-semibold tracking-tighter text-[#2A2422] leading-none mb-1 md:mb-2 text-balance">Filter Set</span>
-                           <span className="text-[10px] md:text-xs font-bold text-stone-500 uppercase tracking-wide text-balance">$250 Value</span>
-                       </div>
+                           <span className="text-[10px] md:text-xs font-bold text-stone-500 uppercase tracking-wide text-balance">$200 Value</span>                       </div>
                     </div>
 
                 </div>

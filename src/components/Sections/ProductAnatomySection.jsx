@@ -84,13 +84,13 @@ const ProductAnatomySection = () => {
                 
                 <div className="relative max-w-[1200px] mx-auto mb-10 md:mb-14 px-4 md:px-0 mt-8 md:mt-0">
                     <div className="text-center mb-4 md:mb-6">
-                        <Label className="text-[#f2663b] flex items-center justify-center gap-2 mb-3 font-bold uppercase tracking-[0.1em]">
-                            Viven protects and enhances your health
+                        <Label className="text-[#f2663b] flex items-center justify-center gap-2 mb-3 font-bold uppercase tracking-[0.1em] whitespace-nowrap">
+                            High flow rates, no more waiting.
                         </Label>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tighter text-[#2A2422] leading-[1.1] md:leading-[1.05]">
-                            High flow rates, no more waiting. {' '}
+                            Clean water, minerals, {' '}
                             <span className="relative inline-block group cursor-help underline decoration-stone-300 underline-offset-[6px] hover:decoration-[#f2663b] transition-colors">
-                                Molecular Hydrogen
+                                molecular hydrogen
                                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 sm:w-80 p-4 bg-white border border-stone-200 text-sm text-stone-600 rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 text-center shadow-xl font-sans font-normal normal-case tracking-normal leading-relaxed translate-y-1 group-hover:translate-y-0">
                                     Natural supplement, primarily used for fighting oxidative stress and regulating oxidants. 
                                     <br />
@@ -106,10 +106,10 @@ const ProductAnatomySection = () => {
                                 3X RO’s flow rate means you fill your cups, bottles, and pots quickly.
                             </p>
                             <p className="text-lg md:text-xl text-stone-600 font-medium leading-tight max-w-3xl mx-auto">
-                                No waiting for clean water after emptying your pitcher or RO tank. 
-                                <span className="text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-[#2A2422] leading-[1.1] mt-3 block">
-                                    With Viven, you don’t need to manage your filtered water anymore.
-                                </span>
+                                No waiting for clean water after emptying your pitcher or RO tank.
+                            </p>
+                            <p className="text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-[#2A2422] leading-[1.1] mt-3 whitespace-nowrap">
+                                With Viven, you don’t need to manage your filtered water anymore.
                             </p>
                         </div>
 
