@@ -1,7 +1,20 @@
 
 ## 📝 开发日志 (Development Log)
 
-### 2026-03-14 · 二次修复 (UTC+8)
+### 1741910400 · 三次修复
+
+#### Hero Section 视频 Safari 合成层修复 + 渲染 Fallback（`Hero.jsx`）
+
+**背景：** 前两轮修复（格式协商、filter 位置）之后视频在 Safari 上仍黑屏，判断根本原因是 Safari 未为视频元素提升独立的 GPU 合成层。
+
+*   **强制 GPU 合成层**：给 `<video>` 元素加上 `WebkitTransform: 'translate3d(0,0,0)'` / `transform: 'translate3d(0,0,0)'`。Safari 对 `absolute` 定位的 video 有时不主动创建独立合成层，导致画面无法合成到屏幕上；`translate3d` 是触发层提升的标准做法。
+*   **`timeupdate` 渲染 Fallback**：挂载后监听视频的 `timeupdate` 事件，若 3 秒内该事件从未触发（说明 Safari 未能正常渲染视频），自动切换 `videoFallback` state，将视频替换为同一封面图的静态背景 `<div>`，确保用户不会看到黑屏。
+
+构建验证：`npm run build` 通过，无警告（1.99s）。
+
+---
+
+### 1741910400 · 二次修复
 
 #### Hero Section 视频黑屏根本原因修复（`Hero.jsx`）
 
@@ -15,7 +28,7 @@
 
 ---
 
-### 2026-03-14 (UTC+8)
+### 1741910400 · 初次修复
 
 #### Hero Section 视频 Safari 兼容性修复（`Hero.jsx`）
 
@@ -30,7 +43,7 @@
 
 ---
 
-### 2026-03-14 23:45 (UTC+8)
+### 1741881900
 
 #### 1. Safari 浏览器全方位兼容性深度优化
 针对 Safari 浏览器在视频播放、CSS 特效和硬件加速渲染方面的多个经典问题进行了修复，确保在 iOS 和 macOS 上的表现：
