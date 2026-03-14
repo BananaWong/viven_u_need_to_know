@@ -5,6 +5,7 @@ import Icons from '../Icons';
 const Hero = () => {
   const heroRef = useRef(null);
   const videoRef = useRef(null);
+  const [videoFallback, setVideoFallback] = useState(false);
 
   // --- Customization States (Hero Layout Lab v2.1) ---
   
@@ -56,8 +57,18 @@ const Hero = () => {
       video.addEventListener('canplay', tryPlay, { once: true });
     }
 
+    // Fallback: if timeupdate never fires within 3s, Safari failed to render — show poster image
+    let rendered = false;
+    const onTimeUpdate = () => { rendered = true; };
+    video.addEventListener('timeupdate', onTimeUpdate, { once: true });
+    const fallbackTimer = setTimeout(() => {
+      if (!rendered) setVideoFallback(true);
+    }, 3000);
+
     return () => {
       video.removeEventListener('canplay', tryPlay);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      clearTimeout(fallbackTimer);
     };
   }, []);
 
@@ -185,22 +196,41 @@ const Hero = () => {
 
       <div className="absolute inset-0 z-0">
          <div className="absolute inset-0">
-           {/* Desktop Video — filter applied to wrapper div, NOT the video element.
-               Safari has a known bug where CSS filter directly on <video> causes a black screen
-               due to broken compositing layer handling. Chrome is unaffected. */}
-           <div className="hidden md:block w-full h-full" style={{ filter: 'brightness(95%) contrast(105%)' }}>
-             <video
-               ref={videoRef}
-               autoPlay
-               muted
-               loop
-               playsInline
-               preload="auto"
-               poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
-               className="w-full h-full object-cover"
-             >
-               <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
-             </video>
+           {/* Desktop Video
+               - filter on wrapper div (not video) avoids Safari black screen compositing bug
+               - translate3d on video forces Safari to open a dedicated GPU compositing layer
+               - videoFallback shows static poster if timeupdate never fires within 3s */}
+           <div
+             className="hidden md:block w-full h-full"
+             style={{ filter: 'brightness(95%) contrast(105%)' }}
+           >
+             {videoFallback ? (
+               <div
+                 className="w-full h-full"
+                 style={{
+                   backgroundImage: `url('https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg')`,
+                   backgroundSize: 'cover',
+                   backgroundPosition: 'center',
+                 }}
+               />
+             ) : (
+               <video
+                 ref={videoRef}
+                 autoPlay
+                 muted
+                 loop
+                 playsInline
+                 preload="auto"
+                 poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
+                 className="w-full h-full object-cover"
+                 style={{
+                   WebkitTransform: 'translate3d(0,0,0)',
+                   transform: 'translate3d(0,0,0)',
+                 }}
+               >
+                 <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
+               </video>
+             )}
            </div>
            
            {/* Mobile Image */}
