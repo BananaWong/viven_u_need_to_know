@@ -27,8 +27,6 @@ dist-ssr
 .claude
 .netlify
 .env
-*.md
-!README.md
 狗屁备份
 beifen
 
