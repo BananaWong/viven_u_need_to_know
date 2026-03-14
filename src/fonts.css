@@ -1,0 +1,125 @@
+/* TT Commons Pro - Light (300) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Light Italic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* TT Commons Pro - Regular (400) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* TT Commons Pro - Medium (500) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Medium Italic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* TT Commons Pro - DemiBold (600) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial DemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial DemiBold Italic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* TT Commons Pro - Bold (700) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Bold Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* TT Commons Pro - Black (900) */
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Trial Black Italic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --- TT Commons Pro MONO --- */
+@font-face {
+  font-family: 'TT Commons Pro Mono';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Mono Trial Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro Mono';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Mono Trial Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro Mono';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Mono Trial DemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TT Commons Pro Mono';
+  src: url('./assets/TT Commons Pro Font Family/TT Commons Pro Trial 3-400/TT Commons Pro Mono Trial Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
