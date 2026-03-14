@@ -1,6 +1,20 @@
 
 ## 📝 开发日志 (Development Log)
 
+### 2026-03-14 · 二次修复 (UTC+8)
+
+#### Hero Section 视频黑屏根本原因修复（`Hero.jsx`）
+
+**问题复现：** 上次修复后视频在 Safari 上仍然显示黑屏。
+
+**根本原因：** Safari 有一个已知的渲染 bug —— CSS `filter` 属性直接写在 `<video>` 元素上时，Safari 在创建合成层（compositing layer）时处理异常，导致视频画面全黑。视频本身实际在正常解码播放，只是 Safari 的合成渲染出错。Chrome/Firefox 完全不受影响，因此在开发阶段难以发现。
+
+**修复：** 将 `filter: brightness(95%) contrast(105%)` 从 `<video>` 元素移至外层包裹 `<div>`，`<video>` 本身不附加任何 filter，Safari 即可正常渲染画面。
+
+构建验证：`npm run build` 通过，无警告（1.94s）。
+
+---
+
 ### 2026-03-14 (UTC+8)
 
 #### Hero Section 视频 Safari 兼容性修复（`Hero.jsx`）
