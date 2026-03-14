@@ -35,13 +35,30 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.defaultMuted = true;
-      videoRef.current.muted = true;
-      videoRef.current.play().catch((err) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Safari requires these to be set via JS for autoplay to work
+    video.defaultMuted = true;
+    video.muted = true;
+    // webkit-playsinline for older Safari (iOS < 10)
+    video.setAttribute('webkit-playsinline', '');
+
+    const tryPlay = () => {
+      video.play().catch((err) => {
         console.warn("Hero video autoplay failed:", err);
       });
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener('canplay', tryPlay, { once: true });
     }
+
+    return () => {
+      video.removeEventListener('canplay', tryPlay);
+    };
   }, []);
 
   // Re-run animation when layout or font size changes
@@ -169,16 +186,19 @@ const Hero = () => {
       <div className="absolute inset-0 z-0">
          <div className="absolute inset-0">
            {/* Desktop Video */}
-           <video 
-             ref={videoRef} 
-             autoPlay 
-             muted 
-             loop 
-             playsInline 
-             className="hidden md:block w-full h-full object-cover" 
+           <video
+             ref={videoRef}
+             autoPlay
+             muted
+             loop
+             playsInline
+             preload="auto"
+             poster="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto,so_0/v1772180303/Herosection_d2abca.jpg"
+             className="hidden md:block w-full h-full object-cover"
              style={{ filter: 'brightness(95%) contrast(105%)' }}
            >
-              <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_auto/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
+              {/* f_mp4 ensures Safari always receives MP4 (H.264), avoiding f_auto format negotiation issues */}
+              <source src="https://res.cloudinary.com/dsyxtnpgm/video/upload/q_auto,f_mp4,vc_h264/v1772180303/Herosection_d2abca.mp4" type="video/mp4" />
            </video>
            
            {/* Mobile Image */}

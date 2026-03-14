@@ -1,6 +1,21 @@
 
 ## 📝 开发日志 (Development Log)
 
+### 2026-03-14 (UTC+8)
+
+#### Hero Section 视频 Safari 兼容性修复（`Hero.jsx`）
+
+针对 Safari 在播放 Hero Section 背景视频时出现的几个经典问题进行了修复：
+
+*   **强制 MP4/H.264 编码**：原 Cloudinary URL 使用 `f_auto`（自动格式协商），可能因 Accept 头误判导致 Safari 收到不支持的格式。改为明确指定 `f_mp4,vc_h264`，确保所有 Safari 版本（macOS/iOS）始终获得可播放的 H.264 MP4 流。
+*   **播放时序修复**：原逻辑在挂载后直接调用 `.play()`，Safari 加载视频比 Chrome 慢，容易在 `readyState < 2` 时调用失败。改为检查 `readyState >= 2` 后立即播放，否则监听 `canplay` 事件再触发，避免静默失败。
+*   **旧版 iOS Safari 兼容**：通过 `setAttribute('webkit-playsinline', '')` 补充 iOS 9/10 以下旧版 Safari 所需的 webkit 私有属性。
+*   **加载体验改善**：添加 `preload="auto"` 提示浏览器主动预加载视频；添加 `poster` 属性（Cloudinary 自动生成的视频首帧缩略图），消除 Safari 视频加载期间的黑屏。
+
+构建验证：`npm run build` 通过，无警告（Vite 7.3.1，102 模块，1.86s）。
+
+---
+
 ### 2026-03-14 23:45 (UTC+8)
 
 #### 1. Safari 浏览器全方位兼容性深度优化
