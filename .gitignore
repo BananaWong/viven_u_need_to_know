@@ -25,6 +25,8 @@ dist-ssr
 
 # Project specifics
 .claude
+.netlify
+.env
 *.md
 !README.md
 狗屁备份
