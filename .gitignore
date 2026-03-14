@@ -26,6 +26,7 @@ dist-ssr
 # Project specifics
 .claude
 *.md
+!README.md
 狗屁备份
 beifen
 
