@@ -1,6 +1,118 @@
 
 ## 📝 开发日志 (Development Log)
 
+---
+
+### 2026-03-14-19-00-00 · Safari 视频兼容性完整排查报告
+
+#### 背景
+
+网站首页 Hero Section 背景视频在 iPad Safari 上始终显示黑屏，其他所有内容正常。Safari 在视频无法播放时不报任何错误，只是静默黑屏，导致排查极为困难，共经历六轮。
+
+---
+
+#### 第一轮：Safari 视频播放通用兼容性修复
+
+**假设：** Safari 对自动播放有更严格的策略，旧版 iOS 有额外要求。
+
+**修复内容：**
+- Cloudinary URL 从 `f_auto` 改为 `f_mp4,vc_h264`，防止 CDN 推送 Safari 不支持的格式
+- 修复播放时序：等 `readyState >= 2` 或 `canplay` 事件后再调用 `.play()`
+- 添加 `webkit-playsinline` 兼容 iOS 9/10
+- 添加 `preload="auto"` 和 `poster` 封面图
+
+**结果：** 无效。
+
+---
+
+#### 第二轮：CSS Filter 渲染 Bug
+
+**发现：** Safari 已知缺陷——CSS `filter` 直接加在 `<video>` 元素上时，合成层创建异常，画面全黑。Chrome 不受影响，开发阶段无法发现。
+
+**修复：** 将 `filter: brightness(95%) contrast(105%)` 从 `<video>` 移至外层 `<div>`。
+
+**结果：** 无效。
+
+---
+
+#### 第三轮：GPU 合成层 + 渲染 Fallback
+
+**假设：** Safari 未为视频元素分配独立 GPU 渲染层。
+
+**修复：**
+- 给 `<video>` 加 `transform: translate3d(0,0,0)` 强制开启 GPU 合成层
+- 添加 `timeupdate` 3 秒超时 Fallback：若视频未触发 `timeupdate`，自动切换为静态封面图
+
+**结果：** Fallback 未触发（说明视频在解码），但画面依然黑屏。
+
+---
+
+#### 第四轮：更换 Cloudinary 视频资产
+
+**操作：** 重新导出 H.264 版本上传至 Cloudinary（`v1773485850`），绕过格式转换参数。
+
+**结果：** 首次加载 autoplay 失效（Cloudinary on-demand 转码延迟），刷新后 autoplay 正常，iPad Safari 依然黑屏。
+
+---
+
+#### 第五轮：截图分析 + 根本原因确认
+
+用户提供 iPad Safari 截图，显示页面只有 `<section>` 的 CSS 径向渐变背景（暗色 + 中央灰白光晕），`<video>` 元素完全透明。
+
+**根本原因：原始视频以 AV1 编码上传。**
+
+AV1 在 Apple 设备上的支持情况：
+
+| 设备 | 支持 AV1 |
+|------|---------|
+| iPhone 15+（A17 芯片） | 支持 |
+| iPad Pro M4 | 支持 |
+| 其他所有 iPhone / iPad | **不支持** |
+| macOS Safari 17+ | 支持 |
+| macOS Safari 16 及以下 | **不支持** |
+
+Cloudinary 的 `vc_h264` 参数对此视频未能生效（可能判断原文件已"足够优化"跳过了转码）。
+
+---
+
+#### 第六轮（当前方案）：本地托管 + 双格式多源
+
+**策略：** 脱离 Cloudinary 格式判断，将视频托管在 Hostinger VPS，同时提供 AV1 和 H.264 两个版本：
+
+```
+public/videos/
+├── Herosection_av1.mp4   (1.9MB，Chrome/Firefox)
+└── Herosection_h264.mp4  (3.7MB，Safari)
+```
+
+代码使用 `<source>` 多源，浏览器按 codec 支持自动选择：
+- Safari → 跳过 AV1 → 选 H.264
+- Chrome/Firefox → 选 AV1（体积小 ~50%）
+
+构建验证：`npm run build` 通过，无警告（2.08s）。
+
+---
+
+#### 待完成事项
+
+| 事项 | 状态 |
+|------|------|
+| 部署到 Hostinger VPS | 待部署 |
+| iPad Safari 验证视频正常播放 | 待验证 |
+| （可选）H.264 重编码为 Baseline Profile 提升旧设备兼容性 | 可选 |
+| （可选）清理 Cloudinary 旧视频资产 | 可选 |
+
+---
+
+#### 经验总结
+
+1. Safari 视频播放失败不报错，必须主动排查
+2. AV1 在 Apple 生态覆盖率极低，面向消费者的视频必须提供 H.264 fallback
+3. Cloudinary 的自动转码在实际使用中有不确定性，关键视频建议手动控制格式
+4. `<source>` 多源写法是视频兼容性的最佳实践
+
+---
+
 ### 2026-03-14-17-30-00 · AV1 编码问题确认 + H.264 测试版本上线
 
 #### Hero Section 视频 Safari 黑屏 — 根本原因锁定（`Hero.jsx`）
