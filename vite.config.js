@@ -10,8 +10,8 @@ export default defineConfig({
     // 目标现代浏览器，减少 polyfill 体积
     target: 'es2020',
 
-    // 生产环境不生成 sourcemap
-    sourcemap: false,
+    // 生成 sourcemap 便于生产环境崩溃时定位问题
+    sourcemap: true,
 
     // 单文件超过 800KB 才警告（App.jsx 本身就大）
     chunkSizeWarningLimit: 800,
