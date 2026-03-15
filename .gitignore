@@ -38,3 +38,21 @@ beifen
 *.woff
 *.woff2
 src/assets/TT Commons Pro Font Family/
+
+# Generated DataCheck reports
+public/*.json
+!public/manifest.json
+dist/*.json
+!dist/manifest.json
+
+.env.development
+
+# Backend ignores
+backend/reports/
+backend/data/*.db
+backend/data/sdwa/
+backend/data/ucmr3/
+backend/data/ucmr4/
+backend/data/raw/
+backend/data/syr4/
+backend/src/__pycache__/

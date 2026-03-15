@@ -3,8 +3,226 @@
 > **Note to Claude/Cursor/Other Agents:** This file tracks the architectural evolution and specific "Vibe Coding" optimizations made by previous agents. Please update this log after significant refactors.
 
 ## 🤖 Current Agent Context (March 15, 2026)
-**Last Agent:** Gemini CLI
-**Project State:** **VARIANTS DEPRECATED. CLEANUP IN PROGRESS.**
+**Last Agent:** Claude Sonnet 4.6 (via Claude Code CLI)
+**Project State:** **DATACHECK FEATURE — BACKEND COMPLETE, FRONTEND PENDING.**
+
+---
+
+### 🔍 Recent Updates (March 15, 2026) — DataCheck Water Quality Feature
+
+#### Overview
+A new major feature is in progress: **DataCheck** (`/datacheck/:zip`), a real water quality report page powered by EPA data. The product strategy is: show users the real contaminants in their local tap water → sell Viven as the solution.
+
+The reference/inspiration is [EWG Tap Water Database](https://www.ewg.org/tapwater/). The key persuasion mechanic is the two-tier standard:
+- **EPA legal limit** — what's legally allowed (lenient)
+- **EWG health guideline** — what science says is safe (much stricter, often 10–2500× tighter)
+
+Showing users their water is "legal but not safe" is the core hook.
+
+---
+
+#### Architecture Decision: Static JSON (not a live API)
+
+After evaluating Flask, Bun/Hono, and pre-generation, the team chose **pre-generated static JSON files served by Nginx** on the VPS. Rationale:
+
+- EPA data only updates quarterly — no need for a live server
+- ~20,608 unique ZIP codes → ~20,608 JSON files (compact, ~1–5 KB each)
+- Nginx serving static files is the fastest possible option (<5ms)
+- Zero runtime dependencies, zero crash risk, zero maintenance overhead
+- Quarterly update = run one Python script, rsync files, done
+
+**Frontend fetch:**
+```js
+fetch(`https://api.vivenwater.com/reports/${zip}.json`)
+```
+
+---
+
+#### Data Sources
+- **SQLite database** (`ca-water-quality/data/water_quality.db`, 381 MB) — lives at `C:\Users\banan\Desktop\ca-water-quality\data\` locally, on the VPS at `/var/www/vivenwater/ca-water-quality/data/`
+- **EPA SDWA violations** — 1.18M records, updates quarterly via `quick_update.py`
+- **UCMR5 PFAS** — 1.82M records, 2023–2025 monitoring cycle, near-complete
+- **EWG standards** — 116 contaminants, scraped from EWG website, stored in `backend/src/ewg_standards.py`
+
+> ⚠️ **Key limitation:** EPA violations records tell you a limit was exceeded, but NOT by how much. Only PFAS (UCMR5) data has actual measured concentrations (ppt). So EWG multiplier comparisons (e.g., "133× above EWG limit") only work for PFAS contaminants. For regular EPA violations, we can only show "this contaminant violated EPA standards" + the EWG reference limit for context.
+
+---
+
+#### Files Created (all in `../backend/` relative to this file)
+
+```
+vivenwater_website/designer/
+├── backend/
+│   ├── generate.py              ← Main script: reads SQLite → writes JSON files
+│   ├── update_and_generate.sh   ← Cron script for quarterly auto-update
+│   ├── nginx.conf               ← Nginx config for api.vivenwater.com
+│   ├── requirements.txt         ← Python deps (sqlite3 is stdlib, no pip needed)
+│   └── src/
+│       └── ewg_standards.py     ← 116 EWG contaminant standards (data only)
+└── DATACHECK_SPEC.md            ← Full design spec with wireframes & visual rules
+```
+
+The `backend/src/app.py` and `backend/src/water_lookup.py` are legacy Flask files (copied over for reference). They are **not used** in the final architecture and can be ignored.
+
+---
+
+#### JSON Output Format (per ZIP)
+
+Each file at `reports/{zipcode}.json` looks like:
+
+```json
+{
+  "zip": "90210",
+  "found": true,
+  "generated_at": "2026-03-15",
+  "system": {
+    "pwsid": "CA1910087",
+    "name": "Beverly Hills City Water",
+    "city": "Beverly Hills",
+    "state": "CA",
+    "population": 34000,
+    "connections": 12000,
+    "source_type": "Surface Water"
+  },
+  "risk_level": "HIGH",
+  "summary": {
+    "ewg_exceedances": 3,
+    "pfas_detected": 7,
+    "pfas_total_tested": 29,
+    "epa_health_violations": 1
+  },
+  "contaminants": [
+    {
+      "name": "PFOA",
+      "type": "pfas",
+      "value": 12.0,
+      "unit": "ppt",
+      "exceeds_epa": true,
+      "exceeds_ewg": true,
+      "epa_limit_str": "4 ppt",
+      "ewg_limit_str": "0.09 ppt",
+      "ewg_multiplier": 133,
+      "health_effects": "Harm to the immune system; harm to fetal growth and child development"
+    }
+  ],
+  "violations": [
+    {
+      "contaminant_code": "1040",
+      "contaminant_name": "Nitrate",
+      "status": "Resolved",
+      "begin_date": "01/15/2022",
+      "end_date": "03/20/2022",
+      "is_major": false,
+      "ewg_limit_str": "0.14 ppm",
+      "health_effects": "Cancer; harm to fetal growth and child development"
+    }
+  ]
+}
+```
+
+If `found: false`, the file only contains `{ "zip": "...", "found": false }`.
+
+---
+
+#### Risk Level Logic
+
+| Level | Triggers |
+|-------|----------|
+| `HIGH` | Open EPA health violation, OR any PFAS exceeds EPA limit, OR any contaminant ≥50× EWG limit |
+| `MODERATE` | 3+ PFAS detected, OR 2+ health violations, OR 3+ EWG exceedances |
+| `LOW` | Any PFAS detected or any EWG exceedance |
+| `MINIMAL` | No violations, no PFAS, no EWG exceedances |
+
+---
+
+#### Frontend Work Still Needed
+
+**Status: NOT STARTED**
+
+Three things need to be done in `designer/src/`:
+
+**1. `App.jsx` — add route** (2 lines)
+```jsx
+import DataCheckPage from './pages/DataCheckPage';
+<Route path="/datacheck/:zip" element={<DataCheckPage />} />
+```
+`react-router-dom` is already installed and configured. No new deps needed.
+
+**2. `components/Sections/IntegratedScanner.jsx` — rewrite**
+
+Currently 100% fake (hardcoded results, fake progress bar). Needs to:
+- On submit: fetch `https://api.vivenwater.com/reports/${zip}.json`
+- If `found: true` → `navigate('/datacheck/' + zip)`
+- If `found: false` → show inline error ("No data found for this ZIP")
+- Keep the existing scan animation while the fetch is in-flight
+- Use env var: `const API_BASE = import.meta.env.VITE_API_URL || 'https://api.vivenwater.com'`
+
+Add to `.env.development`: `VITE_API_URL=http://localhost:8080` (or wherever you serve the JSON locally for testing).
+
+**3. `pages/DataCheckPage.jsx` — build from scratch**
+
+Full design spec is in `../DATACHECK_SPEC.md`. Summary of page sections (top → bottom):
+
+| Section | Background | Content |
+|---------|-----------|---------|
+| Header | reuse existing | — |
+| Hero band | `#1C1917` dark | "WATER REPORT · ZIP · System name · population · source type" + inline zip re-search input |
+| Risk score | `#FCFBF9` cream | 3-col stat cards: risk level badge + ewg_exceedances + pfas_detected + epa_health_violations |
+| Contaminants | white | One card per contaminant. Shows value, EWG vs EPA bar comparison, ewg_multiplier badge, health_effects tags |
+| PFAS grid | `#F9F5F0` warm | Grid of detected PFAS chips with value + multiplier |
+| CTA | `#1C1917` dark | "Viven removes 99.9% of what's in your water" + detected contaminant tags + Reserve CTA button |
+| Footer | reuse existing | — |
+
+**Visual rules (match existing Viven design language):**
+- Font: DM Sans (already loaded)
+- Accent: `#f2663b` / `#d94e24`
+- Cards: `bg-white rounded-2xl border border-stone-100 shadow-sm`
+- EWG exceedance border: `border-l-4 border-l-[#f2663b]`
+- EPA violation border: `border-l-4 border-l-red-500`
+- Multiplier badge: `<5× orange`, `5–50× red`, `>50× bg-red-900 text-white`
+- Use `RevealOnScroll` from `components/Common/UI.jsx` for scroll animations
+- Skeleton loading: Tailwind `animate-pulse` placeholder cards while fetch is in-flight
+
+**Empty states:**
+- ZIP not found → "No data found · [← Search again]" + optional email capture
+- System found but MINIMAL risk → positive framing + educational Viven CTA
+
+---
+
+#### How to Test Locally (before VPS deploy)
+
+```bash
+# 1. Generate JSON for a single ZIP to verify output
+cd vivenwater_website/backend
+python generate.py --zip 90210 --db "C:/Users/banan/Desktop/ca-water-quality/data/water_quality.db"
+# → creates reports/90210.json
+
+# 2. Serve the reports folder locally
+cd reports && python -m http.server 8080
+# → http://localhost:8080/90210.json
+
+# 3. Set env var in designer/.env.development
+VITE_API_URL=http://localhost:8080
+
+# 4. Run the frontend
+cd vivenwater_website/designer && npm run dev
+```
+
+---
+
+#### VPS Deploy Checklist (when ready)
+
+```
+[ ] Run: python generate.py --db /path/to/db --out /var/www/vivenwater/reports
+[ ] Copy nginx.conf → /etc/nginx/sites-available/api.vivenwater.com
+[ ] Enable: ln -s ... /etc/nginx/sites-enabled/
+[ ] SSL: certbot --nginx -d api.vivenwater.com
+[ ] Test: curl https://api.vivenwater.com/reports/90210.json
+[ ] Set cron: 0 2 1 1,4,7,10 * /var/www/vivenwater/backend/update_and_generate.sh
+[ ] Frontend: npm run build → deploy to VPS
+```
+
+---
 
 ---
 
