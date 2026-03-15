@@ -81,6 +81,7 @@ VIOLATION_ALIASES = {
     "1,1-DICHLOROETHYLENE":                 "1,1-DICHLOROETHANE",
     "FLUORIDE":                             None,
     "TTHM":                                 "TOTAL TRIHALOMETHANES (TTHMS)",
+    "TOTAL HALOACETIC ACIDS (HAA5)":        "HALOACETIC ACIDS (HAA5)",
     "CARBON, TOTAL":                        None,
     # UCMR3/4 name aliases
     "CHROMIUM-6":                           "CHROMIUM (HEXAVALENT)",
@@ -333,6 +334,99 @@ def get_lcr_results(conn: sqlite3.Connection, pwsid: str) -> dict | None:
     return result if result else None
 
 
+def get_syr4_results(conn: sqlite3.Connection, pwsid: str) -> list[dict]:
+    """
+    Get SYR4 (Six-Year Review 4) monitoring results for regulated contaminants.
+    THMs, HAAs, Bromate, Chlorite — routine monitoring data from 2012-2019.
+    Values are stored in µg/L (= ppb). EWG standards for these are also in ppb.
+    """
+    exists = conn.execute(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='syr4_results'"
+    ).fetchone()[0]
+    if not exists:
+        return []
+
+    rows = conn.execute("""
+        SELECT contaminant, avg_value, max_value, unit, sample_count,
+               detect_count, latest_date
+        FROM syr4_results
+        WHERE pwsid = ?
+          AND detect_count > 0
+          AND avg_value IS NOT NULL
+        ORDER BY avg_value DESC
+    """, (pwsid.strip(),)).fetchall()
+
+    results = []
+    for row in rows:
+        results.append({
+            "name":         row["contaminant"],
+            "value":        round(float(row["avg_value"]), 4),
+            "max_value":    round(float(row["max_value"]), 4),
+            "unit":         "ppb",
+            "sample_count": row["sample_count"],
+            "detect_count": row["detect_count"],
+            "latest_date":  row["latest_date"] or "",
+        })
+    return results
+
+
+def build_syr4_contaminants(detected: list[dict]) -> list[dict]:
+    """
+    Cross-reference SYR4 detected contaminants with EWG standards.
+    Values are in ppb (µg/L). EWG standards for these are also in ppb.
+    """
+    contaminants = []
+    for p in detected:
+        std = ewg_lookup(p["name"])
+        value_ppb = p["value"]  # average value in ppb
+
+        entry = {
+            "name":          p["name"],
+            "type":          "syr4",
+            "value":         value_ppb,
+            "unit":          "ppb",
+            "sample_date":   p["latest_date"],
+            "exceeds_epa":   False,
+            "exceeds_ewg":   False,
+            "epa_limit_str": "No legal limit",
+            "ewg_limit_str": None,
+            "ewg_multiplier": None,
+            "health_effects": None,
+        }
+
+        if std:
+            ewg_val = std["ewg_limit"]
+            ewg_unit = std["unit"]
+
+            entry["epa_limit_str"]  = std["epa_limit_str"]
+            entry["ewg_limit_str"]  = std["ewg_limit_str"]
+            entry["health_effects"] = std["health_effects"]
+
+            # Convert value to EWG unit for comparison
+            if ewg_unit == "ppb":
+                cmp_value = value_ppb
+            elif ewg_unit == "ppm":
+                cmp_value = value_ppb / 1000.0
+            elif ewg_unit == "ppt":
+                cmp_value = value_ppb * 1000.0
+            else:
+                cmp_value = value_ppb
+
+            epa_limit = std["epa_limit"]
+            if epa_limit and epa_limit > 0 and cmp_value > epa_limit:
+                entry["exceeds_epa"] = True
+
+            if ewg_val and ewg_val > 0:
+                entry["exceeds_ewg"] = cmp_value > ewg_val
+                if entry["exceeds_ewg"]:
+                    entry["ewg_multiplier"] = round(cmp_value / ewg_val)
+
+        contaminants.append(entry)
+
+    contaminants.sort(key=lambda x: x["ewg_multiplier"] or 0, reverse=True)
+    return contaminants
+
+
 def get_pfas_total_tested(conn: sqlite3.Connection, pwsid: str) -> int:
     row = conn.execute("""
         SELECT COUNT(DISTINCT contaminant) as cnt
@@ -359,6 +453,7 @@ def build_contaminants(pfas_detected: list[dict]) -> list[dict]:
         entry = {
             "name":         p["name"],
             "type":         "pfas",
+            "source":       "EPA UCMR5 Monitoring (2023–2025)",
             "value":        value,
             "unit":         "ppt",
             "sample_date":  p["sample_date"],
@@ -632,16 +727,18 @@ def build_report(conn: sqlite3.Connection, zipcode: str) -> dict:
     ucmr3_detected  = get_ucmr_results(conn, pwsid, "ucmr3_results")
     ucmr4_detected  = get_ucmr_results(conn, pwsid, "ucmr4_results")
     lcr_data        = get_lcr_results(conn, pwsid)
+    syr4_detected   = get_syr4_results(conn, pwsid)
 
     # ── Build structured lists ──
     pfas_contaminants  = build_contaminants(pfas_detected)
     ucmr3_contaminants = build_ucmr_contaminants(ucmr3_detected, "ucmr3")
     ucmr4_contaminants = build_ucmr_contaminants(ucmr4_detected, "ucmr4")
     lcr_contaminants   = build_lcr_contaminants(lcr_data)
+    syr4_contaminants  = build_syr4_contaminants(syr4_detected)
     violations         = build_violations(conn, raw_violations)
 
     # Merge all non-PFAS contaminants into one sorted list
-    other_contaminants = ucmr3_contaminants + ucmr4_contaminants + lcr_contaminants
+    other_contaminants = ucmr3_contaminants + ucmr4_contaminants + lcr_contaminants + syr4_contaminants
     # Deduplicate by name AND by EWG standard key (e.g. chromium / chromium-6 → same standard)
     seen_names = set()
     seen_ewg_keys = set()

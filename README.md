@@ -5,6 +5,19 @@
 
 ---
 
+### 2026-03-16-12-00-00 · DataCheck 核心功能上线 & Git 瘦身
+
+**1. DataCheck 前端与后端集成 (史诗级更新)**
+*   **极致性能架构**：采用预生成静态 JSON 直出方案，彻底解决数据库查询延迟。通过 Python 脚本（`backend/generate.py`）将 1.16 GB 的 SQLite 全美水质数据库打包成 20,000+ 个针对单一邮编的 `.json` 静态文件，配合 Nginx 提供稳定服务。
+*   **前端交互与路由**：在 `App.jsx` 配置 `/datacheck/:zip` 路由。重构首页 `IntegratedScanner` 扫描仪组件，接入真实 API 数据，并加入了基于 `locations.json` 的城市与邮编模糊搜索（Fuzzy Match）逻辑。
+*   **高转化报告页开发**：从零实现了数百行的 `DataCheckPage.jsx`。精准呈现风险等级卡片、PFAS 等违规污染物的对比图表。核心亮点为将检出值与 EPA（宽松的法定标准）及 EWG（严格的健康指南）直观对比，有效传递“你的水合法，但不安全”的强力心智，并一键导流至 Stripe 支付。
+
+**2. 仓库瘦身与规范清理**
+*   **后端源数据拦截**：优化了 `.gitignore`，将所有数百 MB 级的原始数据（`.db`, `syr4/*.zip` 等）及大规模的 `reports` 文件夹彻底排除，防止撑爆 GitHub。
+*   **文档规范**：将项目中多余的规划与设计规范 Markdown 文件（如 `DATACHECK_SPEC.md`、`AI_COLLABORATION.md` 等）移出版本控制缓存（`git rm --cached`），仅保留 `README.md`，维持线上代码库的绝对纯净。
+
+---
+
 ### 2026-03-15-12-06-00 · 饰板交互重构与品牌视觉对齐
 
 **1. 饰板详情页（ProductFinishesSection）交互修改**
