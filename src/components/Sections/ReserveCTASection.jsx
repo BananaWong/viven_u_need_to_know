@@ -56,6 +56,17 @@ const ReserveCTASection = () => {
         <><strong>Renter-friendly</strong>: 5-minute, 1-tool installation</>
     ];
 
+    const handleReserveClick = (e) => {
+        e.preventDefault();
+        if (window.fbq) {
+            window.fbq('track', 'InitiateCheckout', {
+                value: 50,
+                currency: 'USD'
+            });
+        }
+        window.location.href = 'https://buy.stripe.com/9B6dR978Fem9byOe5824003';
+    };
+
     return (
         <section id="reserve" className="bg-[#F5F5F7] py-24 md:py-32 border-t border-stone-200 relative overflow-hidden">
             <RevealOnScroll>
@@ -126,7 +137,7 @@ const ReserveCTASection = () => {
 
                             {/* Central CTA - Push to bottom */}
                             <div className="mt-auto flex flex-col items-center md:items-start w-full">
-                                <a href="https://buy.stripe.com/9B6dR978Fem9byOe5824003" target="_blank" rel="noopener noreferrer" className="inline-block w-full sm:w-auto">
+                                <a href="https://buy.stripe.com/9B6dR978Fem9byOe5824003" onClick={handleReserveClick} className="inline-block w-full sm:w-auto">
                                     <Button variant="primary" className="h-14 md:h-16 px-10 md:px-14 text-xs md:text-sm font-semibold mb-4 shadow-xl hover:shadow-2xl shadow-[#f2663b]/20 w-full sm:w-auto hover:-translate-y-0.5 transition-all">
                                         Reserve Now for $50
                                     </Button>

@@ -5,6 +5,38 @@
 
 ---
 
+### 2026-03-17-04-00-00 · SYR4 数据源集成 & 数据来源标注
+
+**1. EPA Six-Year Review 4 (SYR4) 监测数据导入**
+*   **新增第7个数据源**：导入 EPA SYR4 ICR 数据（2012–2019），包含全美 42,723 个水系统的 274,027 条常规监测记录，涵盖 13 种受监管污染物（THMs 三卤甲烷、HAAs 卤乙酸、溴酸盐、亚氯酸盐）。
+*   **数据写入**：新建 `syr4_results` 表（按 PWSID+污染物聚合：平均值、最大值、检出次数、最新日期）和 `syr4_averages` 表（全国+各州平均值，591 条）。
+*   **导入脚本**：`backend/scripts/import_syr4.py` — 直接从 ZIP 文件读取 TSV，无需解压。支持 SYR4_THMs.zip (93MB)、SYR4_HAAs.zip (84MB)、SYR4_Bromate_Chlorite.zip (1.8MB)。
+*   **效果对比**（参考系统 NJ1424001 / ZIP 07927）：
+    *   导入前：21 种污染物，9 项超 EWG 标准
+    *   导入后：31 种污染物，18 项超 EWG 标准
+    *   EWG 原始数据：39 种 / 17 项超标 — 差距大幅缩小
+
+**2. generate.py 集成 SYR4**
+*   新增 `get_syr4_results()` 和 `build_syr4_contaminants()` 函数，SYR4 数据作为第 7 数据源合并进 `other_contaminants`，复用现有去重逻辑（按名称 + EWG 标准键）。
+*   SYR4 数据单位为 µg/L (ppb)，EWG 标准同样为 ppb，无需单位转换。
+*   新增 `TOTAL HALOACETIC ACIDS (HAA5)` → `HALOACETIC ACIDS (HAA5)` 别名映射。
+
+**3. 数据来源标注 (Source Attribution)**
+*   **后端**：所有污染物条目新增 `source` 字段，标注具体 EPA 数据来源及年份范围：
+    *   PFAS → `EPA UCMR5 Monitoring (2023–2025)`
+    *   UCMR3 → `EPA UCMR3 Monitoring (2013–2015)`
+    *   UCMR4 → `EPA UCMR4 Monitoring (2018–2020)`
+    *   LCR → `EPA Lead & Copper Rule`
+    *   SYR4 → `EPA Six-Year Review 4 (2012–2019)`
+    *   违规 → `EPA SDWA Violations & Enforcement`
+*   **前端**：`DataCheckPage.jsx` 的 `ContaminantCard` 和 `ViolationContaminantCard` 展开区域底部新增来源行，显示数据来源 + 采样日期/违规期间。
+*   **Icons.jsx**：新增 `FileText` 图标用于来源标注显示。
+
+**4. 全量重新生成**
+*   20,608 个 ZIP 报告已全部重新生成并同步到 `public/`。
+
+---
+
 ### 2026-03-16-12-00-00 · DataCheck 核心功能上线 & Git 瘦身
 
 **1. DataCheck 前端与后端集成 (史诗级更新)**
@@ -223,3 +255,14 @@ public/videos/
 
 ---
 *© 2026 Viven Water Systems Inc. All Rights Reserved.*
+
+### 2026-03-16-16-00-00 Add Meta Pixel Tracking and Clean /dist
+
+**1. Meta Pixel Events Added**
+- Added InitiateCheckout event to "Reserve Now" buttons.
+- Created new /reservation-success page to fire Purchase event and redirect to Google Form.
+
+**2. DataCheck Disabled & Cleanup**
+- Temporarily hid DataCheck UI.
+- Moved all generated .json reports into dist/api/ for cleaner deployment.
+- Updated frontend fetch path to /api/.

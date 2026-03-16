@@ -20,6 +20,7 @@ import Footer from './components/Sections/Footer';
 import SciencePage from './components/Sections/SciencePage';
 import LegalPage from './components/Sections/LegalPage';
 import DataCheckPage from './pages/DataCheckPage';
+import ReservationSuccessPage from './pages/ReservationSuccessPage';
 import CookieConsent from './components/Sections/CookieConsent';
 import EmailPopup from './components/Sections/EmailPopup';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY } from './constants/data.jsx';
@@ -45,7 +46,7 @@ const HomePage = () => {
       <Hero />
       <ProblemSection />
       <ComparisonSection />
-      <IntegratedScanner />
+      {/* <IntegratedScanner /> */}
       <ProductAnatomySection />
       <div className="bg-white">
          <TechnologySection />
@@ -87,6 +88,7 @@ export default function App() {
         <Route path="/science/" element={<SciencePage />} />
         <Route path="/datacheck" element={<DataCheckPage />} />
         <Route path="/datacheck/:zip" element={<DataCheckPage />} />
+        <Route path="/reservation-success" element={<ReservationSuccessPage />} />
         <Route path="/terms" element={<LegalPage title={TERMS_OF_SERVICE.title} content={TERMS_OF_SERVICE.content} />} />
         <Route path="/privacy" element={<LegalPage title={PRIVACY_POLICY.title} content={PRIVACY_POLICY.content} />} />
       </Routes>

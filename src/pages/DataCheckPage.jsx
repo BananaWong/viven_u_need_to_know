@@ -366,6 +366,17 @@ const ContaminantCard = ({ item, index }) => {
                 </div>
               </div>
             )}
+
+            {/* Data source */}
+            {(item.source || item.sample_date) && (
+              <div className="flex items-center gap-1.5 text-[10px] text-stone-400 font-mono pt-1">
+                <Icons.FileText className="w-3 h-3 shrink-0" />
+                <span>
+                  {item.source || item.type?.toUpperCase()}
+                  {item.sample_date && <> · Sampled {item.sample_date}</>}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -470,12 +481,6 @@ const ViolationContaminantCard = ({ item, index }) => {
               )}
             </div>
 
-            {/* Violation date range */}
-            <div className="text-xs text-stone-400 font-mono">
-              {item.begin_date && <span>Violation period: {item.begin_date}</span>}
-              {item.end_date && <span> — {item.end_date}</span>}
-            </div>
-
             {/* Health effects */}
             {item.health_effects && (
               <div>
@@ -489,6 +494,16 @@ const ViolationContaminantCard = ({ item, index }) => {
                 </div>
               </div>
             )}
+
+            {/* Data source & violation period */}
+            <div className="flex items-center gap-1.5 text-[10px] text-stone-400 font-mono pt-1">
+              <Icons.FileText className="w-3 h-3 shrink-0" />
+              <span>
+                {item.source || 'EPA SDWA'}
+                {item.begin_date && <> · Violation: {item.begin_date}</>}
+                {item.end_date && <> — {item.end_date}</>}
+              </span>
+            </div>
           </div>
         )}
       </div>
@@ -509,7 +524,8 @@ const DataCheckPage = () => {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${API_BASE}/${zipcode}.json`);
+      // Fetch from the new /api directory where all static JSON reports are stored
+      const res = await fetch(`${API_BASE}/api/${zipcode}.json`);
       if (!res.ok) throw new Error('not found');
       const json = await res.json();
       setData(json);
@@ -838,13 +854,18 @@ const DataCheckPage = () => {
             )}
 
             <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <a href="https://buy.stripe.com/9B6dR978Fem9byOe5824003" target="_blank" rel="noopener noreferrer">
-                <Button variant="primary" className="h-14 px-10 text-xs">
-                  Reserve Your Viven
-                  <Icons.ArrowRight className="w-4 h-4" />
-                </Button>
-              </a>
-              <Link to="/science">
+            <a href="https://buy.stripe.com/9B6dR978Fem9byOe5824003" onClick={(e) => {
+              e.preventDefault();
+              if (window.fbq) {
+                window.fbq('track', 'InitiateCheckout', { value: 50, currency: 'USD' });
+              }
+              window.location.href = 'https://buy.stripe.com/9B6dR978Fem9byOe5824003';
+            }} className="inline-block">
+              <Button variant="primary" className="h-14 px-10 text-xs">
+                Reserve Your Viven
+                <Icons.ArrowRight className="w-4 h-4" />
+              </Button>
+            </a>              <Link to="/science">
                 <Button variant="outline" className="h-14 px-10 text-xs">
                   View the Science
                 </Button>
